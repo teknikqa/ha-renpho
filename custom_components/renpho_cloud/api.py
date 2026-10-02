@@ -15,6 +15,7 @@ import asyncio
 import base64
 import json
 import os
+import sys
 from typing import Any
 
 import aiohttp
@@ -231,7 +232,17 @@ async def _live_check() -> None:
         client = RenphoClient(
             session, os.environ["RENPHO_EMAIL"], os.environ["RENPHO_PASSWORD"]
         )
-        print(json.dumps(await client.latest_measurement(), indent=2))
+        records = [r for t in await client._tables() for r in await client._records(t)]
+        stamps = [timestamp(r) for r in records]
+        order = (
+            "newest-first"
+            if stamps == sorted(stamps, reverse=True)
+            else "oldest-first"
+            if stamps == sorted(stamps)
+            else "unsorted"
+        )
+        print(json.dumps(max(records, key=timestamp, default=None), indent=2))
+        print(f"{len(records)} records, server order: {order}", file=sys.stderr)
 
 
 if __name__ == "__main__":
