@@ -67,6 +67,14 @@ uv run pytest
 uv run ruff check . && uv run ruff format --check .
 ```
 
+### Release
+
+HACS offers each GitHub release as an update. To cut one:
+
+1. Set the new version in `custom_components/renpho_cloud/manifest.json`,
+   commit and push.
+2. `gh release create v<version> --generate-notes`
+
 ## Credits
 
 The wire protocol (endpoints, encryption) was documented by
