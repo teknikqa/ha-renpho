@@ -1,0 +1,12 @@
+{
+  "domain": "renpho_cloud",
+  "name": "Renpho Health",
+  "codeowners": ["@teknikqa"],
+  "config_flow": true,
+  "documentation": "https://github.com/teknikqa/ha-renpho",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/teknikqa/ha-renpho/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

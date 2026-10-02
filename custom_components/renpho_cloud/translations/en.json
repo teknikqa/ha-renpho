@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Sign in with your Renpho Health app account.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        },
+        "data_description": {
+          "email": "The email you use in the Renpho Health app.",
+          "password": "Stored in Home Assistant and sent only to the Renpho cloud."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Renpho rejected that email and password.",
+      "cannot_connect": "Could not reach the Renpho cloud."
+    },
+    "abort": {
+      "already_configured": "This account is already set up.",
+      "reauth_successful": "Signed in again.",
+      "wrong_account": "That is a different Renpho account. Sign in with the original one."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "bmi": { "name": "BMI" },
+      "body_fat": { "name": "Body fat" },
+      "body_water": { "name": "Body water" },
+      "muscle": { "name": "Muscle" },
+      "bone": { "name": "Bone" },
+      "protein": { "name": "Protein" },
+      "subcutaneous_fat": { "name": "Subcutaneous fat" },
+      "visceral_fat": { "name": "Visceral fat" },
+      "bmr": { "name": "Basal metabolic rate" },
+      "body_age": { "name": "Body age" },
+      "lean_body_mass": { "name": "Lean body mass" },
+      "fat_free_weight": { "name": "Fat-free weight" },
+      "heart_rate": { "name": "Heart rate" },
+      "cardiac_index": { "name": "Cardiac index" },
+      "last_measurement": { "name": "Last measurement" }
+    }
+  }
+}
