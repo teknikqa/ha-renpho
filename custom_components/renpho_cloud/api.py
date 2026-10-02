@@ -37,7 +37,6 @@ _PLATFORM = "android"
 _SCALE_TYPES = [f"{i:02X}" for i in range(1, 21)]
 _OK_CODES = {"0", "101", "200", "20000"}
 _PAGE_SIZE = 50
-_MAX_PAGES = 200  # 10,000 weigh-ins; stops a server that ignores pageNum
 _TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 
@@ -195,35 +194,26 @@ class RenphoClient:
         return {s["tableName"] for s in scales or [] if s.get("tableName")}
 
     async def _records(self, table: str) -> list[dict[str, Any]]:
+        """Most recent measurements in one table; the server lists newest first."""
+        query = {
+            "pageNum": 1,
+            "pageSize": _PAGE_SIZE,
+            "userIds": [self.user_id],
+            "tableName": table,
+        }
         for path in MEASUREMENTS:
-            records: list[dict[str, Any]] = []
-            for page in range(1, _MAX_PAGES + 1):
-                rows = _rows(
-                    await self._call(
-                        path,
-                        {
-                            "pageNum": page,
-                            "pageSize": _PAGE_SIZE,
-                            "userIds": [self.user_id],
-                            "tableName": table,
-                        },
-                    )
-                )
-                records += rows
-                if len(rows) < _PAGE_SIZE:
-                    break
-            if records:
+            if records := _rows(await self._call(path, query)):
                 return records
         return []
 
     async def latest_measurement(self) -> dict[str, Any] | None:
         """Return the newest measurement across all scales, or None."""
-        # ponytail: reads the whole history every poll (one request per 50
-        # weigh-ins) because the server's sort order is undocumented. Fetch
-        # only page 1 once newest-first ordering is confirmed on a live account.
+        # ponytail: newest-first order was seen on one account with 2 records.
+        # If the sensors ever stick on an old weigh-in, page through everything.
         records: list[dict[str, Any]] = []
         for table in await self._tables():
             records += await self._records(table)
+        # max() rather than records[0]: tolerates a page ordered by sync time.
         return max(records, key=timestamp, default=None)
 
 

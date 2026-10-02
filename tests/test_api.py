@@ -44,14 +44,14 @@ def test_timestamp_accepts_seconds_milliseconds_and_junk():
     assert timestamp({}) == 0
 
 
-async def test_latest_measurement_spans_pages(client, cloud):
-    # Newest record sits in the middle of page 2, so sort order cannot matter.
-    cloud.records = [{"timeStamp": 1000 + i, "weight": 70} for i in range(120)]
-    cloud.records[75] = {"timeStamp": 9999, "weight": 81.5}
+async def test_latest_measurement_reads_only_the_first_page(client, cloud):
+    # The server lists newest first; a late-synced record may sit out of place.
+    cloud.records = [{"timeStamp": 9000 - i, "weight": 70} for i in range(120)]
+    cloud.records[3] = {"timeStamp": 9999, "weight": 81.5}
 
     assert await client.latest_measurement() == {"timeStamp": 9999, "weight": 81.5}
     assert client.user_id == USER_ID
-    assert cloud.calls(MEASUREMENTS[0]) == 3
+    assert cloud.calls(MEASUREMENTS[0]) == 1
     assert cloud.calls(MEASUREMENTS[1]) == 0
 
 
