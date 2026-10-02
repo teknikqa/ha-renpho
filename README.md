@@ -69,11 +69,15 @@ uv run ruff check . && uv run ruff format --check .
 
 ### Release
 
-HACS offers each GitHub release as an update. To cut one:
+HACS offers each GitHub release as an update.
+[release-please](https://github.com/googleapis/release-please) cuts them:
 
-1. Set the new version in `custom_components/renpho_cloud/manifest.json`,
-   commit and push.
-2. `gh release create v<version> --generate-notes`
+1. Push [Conventional Commits](https://www.conventionalcommits.org/) to
+   `main`. `fix:` and `feat:` commits are releasable; `docs:`, `test:` and
+   `chore:` are not.
+2. release-please opens or updates a release PR that bumps the version and
+   writes `CHANGELOG.md`.
+3. Merge that PR. release-please tags the commit and publishes the release.
 
 ## Credits
 

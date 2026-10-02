@@ -1,0 +1,19 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write # release-please labels its PR
+    steps:
+      # Uses the default token, so CI does not run on the release PR itself;
+      # the PR only touches the changelog and version numbers.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
