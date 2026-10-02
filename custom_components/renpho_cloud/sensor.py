@@ -88,8 +88,8 @@ SENSORS = (
     _metric("protein", "protein", PERCENTAGE),
     _metric("subfat", "subcutaneous_fat", PERCENTAGE),
     _metric("visfat", "visceral_fat"),
-    _metric("bmr", "bmr", "kcal/d"),
-    _metric("bodyage", "body_age", UnitOfTime.YEARS),
+    _metric("bmr", "bmr", "kcal/d", precision=0),
+    _metric("bodyage", "body_age", UnitOfTime.YEARS, precision=0),
     # Confirmed on a live record: fatFreeWeight = sinew + bone, all in kg.
     _mass("sinew", "muscle_mass"),
     _mass("bone", "bone_mass"),
