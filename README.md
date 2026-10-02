@@ -16,9 +16,10 @@ One device per Renpho account, with these sensors:
 
 | Sensor | Unit |
 | --- | --- |
-| Weight, muscle mass, bone mass, fat-free weight | kg (change to lb or st per entity in the UI) |
+| Weight, muscle mass, skeletal muscle mass, bone mass, fat-free weight | kg (change to lb or st per entity in the UI) |
 | Body fat, body water, skeletal muscle, protein, subcutaneous fat | % |
-| BMI, visceral fat | none |
+| BMI, visceral fat, body score, waist-to-hip ratio | none |
+| Fat mass and muscle mass for each arm, each leg and the trunk | kg; disabled by default; only scales with hand electrodes measure them |
 | Basal metabolic rate | kcal/d |
 | Body age | years |
 | Last measurement | timestamp |

@@ -19,6 +19,11 @@ RECORD = {
     "bmr": 1750,
     "sinew": 52.4,
     "bone": 3.2,
+    "smmMass": 30.5,
+    "bodyScore": 82.0,
+    "whr": 0.88,
+    "laBodyFatMass": 1.1,
+    "tMuscleMass": 24.6,
     "heartRate": 0,
 }
 
@@ -74,8 +79,29 @@ async def test_user_flow_creates_entry_and_sensors(hass, cloud):
         "muscle_mass": "52.4",
         "bone_mass": "3.2",
         "fat_free_weight": "unknown",
+        "skeletal_muscle_mass": "30.5",
+        "body_score": "82.0",
+        "waist_to_hip_ratio": "0.88",
         "last_measurement": "2023-11-14T22:13:20+00:00",
     }
+
+
+async def test_segment_sensors_exist_but_start_disabled(hass, cloud, entity_registry):
+    cloud.records = [RECORD]
+    await _add_entry(hass)
+
+    disabled = {
+        e.unique_id.removeprefix(f"{USER_ID}_")
+        for e in entity_registry.entities.values()
+        if e.disabled_by
+    }
+    assert disabled == {
+        *(f"{p}BodyFatMass" for p in ("la", "ra", "ll", "rl", "t")),
+        *(f"{p}MuscleMass" for p in ("la", "ra", "ll", "rl", "t")),
+        "heartRate",
+        "cardiacIndex",
+    }
+    assert hass.states.get("sensor.me_example_com_trunk_muscle_mass") is None
 
 
 async def test_same_account_cannot_be_added_twice(hass, cloud):

@@ -26,7 +26,13 @@ PARALLEL_UPDATES = 0
 MEASURED_AT = "measured_at"
 
 
-def _mass(key: str, translation_key: str | None = None) -> SensorEntityDescription:
+def _mass(
+    key: str,
+    translation_key: str | None = None,
+    *,
+    enabled: bool = True,
+    precision: int = 1,
+) -> SensorEntityDescription:
     # Renpho stores kilograms; the weight device class lets each user pick lb or st.
     return SensorEntityDescription(
         key=key,
@@ -34,22 +40,43 @@ def _mass(key: str, translation_key: str | None = None) -> SensorEntityDescripti
         device_class=SensorDeviceClass.WEIGHT,
         native_unit_of_measurement=UnitOfMass.KILOGRAMS,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_display_precision=1,
+        suggested_display_precision=precision,
+        entity_registry_enabled_default=enabled,
     )
 
 
 def _metric(
-    key: str, translation_key: str, unit: str | None = None, *, enabled: bool = True
+    key: str,
+    translation_key: str,
+    unit: str | None = None,
+    *,
+    enabled: bool = True,
+    precision: int = 1,
 ) -> SensorEntityDescription:
     return SensorEntityDescription(
         key=key,
         translation_key=translation_key,
         native_unit_of_measurement=unit,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_display_precision=1,
+        suggested_display_precision=precision,
         entity_registry_enabled_default=enabled,
     )
 
+
+# Segmental fields are named <prefix>BodyFatMass and <prefix>MuscleMass. Only
+# scales with hand electrodes report them, so they start disabled.
+_SEGMENTS = {
+    "la": "left_arm",
+    "ra": "right_arm",
+    "ll": "left_leg",
+    "rl": "right_leg",
+    "t": "trunk",
+}
+_SEGMENT_SENSORS = tuple(
+    _mass(f"{prefix}{field}", f"{name}_{kind}", enabled=False, precision=2)
+    for field, kind in (("BodyFatMass", "fat_mass"), ("MuscleMass", "muscle_mass"))
+    for prefix, name in _SEGMENTS.items()
+)
 
 # key is the field name in the API record.
 SENSORS = (
@@ -67,6 +94,10 @@ SENSORS = (
     _mass("sinew", "muscle_mass"),
     _mass("bone", "bone_mass"),
     _mass("fatFreeWeight", "fat_free_weight"),
+    _mass("smmMass", "skeletal_muscle_mass"),
+    _metric("bodyScore", "body_score", precision=0),
+    _metric("whr", "waist_hip_ratio", precision=2),
+    *_SEGMENT_SENSORS,
     # Only some scales measure these.
     _metric("heartRate", "heart_rate", "bpm", enabled=False),
     _metric("cardiacIndex", "cardiac_index", enabled=False),
