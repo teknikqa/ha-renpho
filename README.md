@@ -6,9 +6,9 @@ cloud and exposes it as Home Assistant sensors.
 > **Unofficial.** Not affiliated with Renpho. It uses the same private API as
 > the Renpho Health mobile app, which can change without notice.
 >
-> **Status: untested against a live account.** The test suite runs against a
-> fake cloud built from the protocol notes credited below. Run the
-> [live check](#live-check) before relying on it.
+> **Status: early.** Sign-in and reading measurements are confirmed against
+> one live account and one scale. It has not yet run inside a real Home
+> Assistant install.
 
 ## What you get
 
@@ -16,8 +16,8 @@ One device per Renpho account, with these sensors:
 
 | Sensor | Unit |
 | --- | --- |
-| Weight, lean body mass, fat-free weight | kg (change to lb or st per entity in the UI) |
-| Body fat, body water, muscle, bone, protein, subcutaneous fat | % |
+| Weight, muscle mass, bone mass, fat-free weight | kg (change to lb or st per entity in the UI) |
+| Body fat, body water, skeletal muscle, protein, subcutaneous fat | % |
 | BMI, visceral fat | none |
 | Basal metabolic rate | kcal/d |
 | Body age | years |
@@ -49,7 +49,8 @@ If your password changes, Home Assistant asks you to sign in again.
 
 ## Live check
 
-Prints the newest raw record for your account, without Home Assistant:
+Prints the newest raw record for your account, and the order the server
+returns records in, without Home Assistant:
 
 ```sh
 uv sync

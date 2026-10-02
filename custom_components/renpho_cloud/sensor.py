@@ -57,14 +57,15 @@ SENSORS = (
     _metric("bmi", "bmi"),
     _metric("bodyfat", "body_fat", PERCENTAGE),
     _metric("water", "body_water", PERCENTAGE),
-    _metric("muscle", "muscle", PERCENTAGE),
-    _metric("bone", "bone", PERCENTAGE),
+    _metric("muscle", "skeletal_muscle", PERCENTAGE),
     _metric("protein", "protein", PERCENTAGE),
     _metric("subfat", "subcutaneous_fat", PERCENTAGE),
     _metric("visfat", "visceral_fat"),
     _metric("bmr", "bmr", "kcal/d"),
     _metric("bodyage", "body_age", UnitOfTime.YEARS),
-    _mass("sinew", "lean_body_mass"),
+    # Confirmed on a live record: fatFreeWeight = sinew + bone, all in kg.
+    _mass("sinew", "muscle_mass"),
+    _mass("bone", "bone_mass"),
     _mass("fatFreeWeight", "fat_free_weight"),
     # Only some scales measure these.
     _metric("heartRate", "heart_rate", "bpm", enabled=False),

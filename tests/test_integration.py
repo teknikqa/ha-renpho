@@ -17,6 +17,8 @@ RECORD = {
     "weight": "81.5",
     "bodyfat": 19.2,
     "bmr": 1750,
+    "sinew": 52.4,
+    "bone": 3.2,
     "heartRate": 0,
 }
 
@@ -63,14 +65,14 @@ async def test_user_flow_creates_entry_and_sensors(hass, cloud):
         "bmi": "unknown",
         "body_fat": "19.2",
         "body_water": "unknown",
-        "muscle": "unknown",
-        "bone": "unknown",
+        "skeletal_muscle": "unknown",
         "protein": "unknown",
         "subcutaneous_fat": "unknown",
         "visceral_fat": "unknown",
         "basal_metabolic_rate": "1750.0",
         "body_age": "unknown",
-        "lean_body_mass": "unknown",
+        "muscle_mass": "52.4",
+        "bone_mass": "3.2",
         "fat_free_weight": "unknown",
         "last_measurement": "2023-11-14T22:13:20+00:00",
     }
