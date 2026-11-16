@@ -17,6 +17,7 @@ from custom_components.renpho_cloud.api import (
     RenphoAuthError,
     RenphoClient,
     RenphoConnectionError,
+    RenphoError,
     decrypt_bytes,
     encrypt,
     timestamp,
@@ -87,6 +88,18 @@ async def test_wrong_password(client, cloud):
     cloud.password = "changed"
     with pytest.raises(RenphoAuthError):
         await client.latest_measurement()
+
+
+async def test_undecryptable_login_is_not_a_bad_password(hass, aioclient_mock):
+    # The server names the problem under "message", not "msg".
+    aioclient_mock.post(
+        BASE_URL + LOGIN,
+        json={"code": -114, "message": "Decryption failed", "data": None},
+    )
+    client = RenphoClient(async_get_clientsession(hass), EMAIL, PASSWORD)
+    with pytest.raises(RenphoError, match="Decryption failed") as exc:
+        await client.login()
+    assert not isinstance(exc.value, RenphoAuthError)
 
 
 async def test_network_failure_is_not_an_auth_error(hass, aioclient_mock):
