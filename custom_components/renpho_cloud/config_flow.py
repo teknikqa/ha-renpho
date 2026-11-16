@@ -7,17 +7,26 @@ from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import SOURCE_REAUTH, ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    SOURCE_REAUTH,
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithReload,
+)
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
 )
 
 from .api import RenphoAuthError, RenphoClient, RenphoConnectionError, RenphoError
-from .const import DOMAIN
+from .const import CONF_POLL_MINUTES, DEFAULT_POLL_MINUTES, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,8 +44,39 @@ SCHEMA = vol.Schema(
 )
 
 
+class RenphoOptionsFlow(OptionsFlowWithReload):
+    """How often to ask the Renpho cloud for a new weigh-in."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        if user_input is not None:
+            return self.async_create_entry(
+                data={CONF_POLL_MINUTES: int(user_input[CONF_POLL_MINUTES])}
+            )
+        current = self.config_entry.options.get(CONF_POLL_MINUTES, DEFAULT_POLL_MINUTES)
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_POLL_MINUTES, default=current): NumberSelector(
+                    NumberSelectorConfig(
+                        min=5,
+                        max=1440,
+                        step=1,
+                        unit_of_measurement="min",
+                        mode=NumberSelectorMode.BOX,
+                    )
+                )
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)
+
+
 class RenphoConfigFlow(ConfigFlow, domain=DOMAIN):
     """Sign in to a Renpho Health account. Reauth reuses the same form."""
+
+    @staticmethod
+    def async_get_options_flow(config_entry: ConfigEntry) -> RenphoOptionsFlow:
+        return RenphoOptionsFlow()
 
     VERSION = 1
 

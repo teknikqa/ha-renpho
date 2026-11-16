@@ -24,6 +24,16 @@
       "wrong_account": "That is a different Renpho account. Sign in with the original one."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "description": "The integration reads the Renpho cloud, so a new weigh-in appears only after the Renpho Health app has synced it.",
+        "data": {
+          "poll_minutes": "Check for new weigh-ins every"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "bmi": { "name": "BMI" },

@@ -27,8 +27,9 @@ One device per Renpho account, with these sensors:
 
 A sensor reads `unknown` when the scale did not measure that value.
 
-The integration polls every 30 minutes. It talks to `cloud.renpho.com`, never
-to the scale, so a weigh-in appears only after the Renpho Health app has
+The integration polls every 30 minutes (change it with the integration's
+**Configure** button, from 5 minutes to 24 hours). It talks to
+`cloud.renpho.com`, never to the scale, so a weigh-in appears only after the Renpho Health app has
 synced it.
 
 ## Install
