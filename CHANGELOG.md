@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.2](https://github.com/teknikqa/ha-renpho/compare/v0.1.1...v0.1.2) (2026-11-16)
+
+
+### Features
+
+* add a diagnostics download ([440497d](https://github.com/teknikqa/ha-renpho/commit/440497de509cff05a21a4a7bc0f8c41595642880))
+* add a diagnostics download ([a2c18d3](https://github.com/teknikqa/ha-renpho/commit/a2c18d3ac0fca527a6b714f913b298fca23e8fb4))
+* let the poll interval be set from 5 minutes to 24 hours ([05169ed](https://github.com/teknikqa/ha-renpho/commit/05169edb31843dfb9937d12baa7f05a09139e7c9))
+* let the poll interval be set from 5 minutes to 24 hours ([f4934e2](https://github.com/teknikqa/ha-renpho/commit/f4934e28312e2d3f0ad8aaf39c521953e5cb2634))
+* reuse the saved session token across restarts ([067f08c](https://github.com/teknikqa/ha-renpho/commit/067f08c794f198c22126663b695bc446c2122f03))
+* reuse the saved session token across restarts ([dcf5b5a](https://github.com/teknikqa/ha-renpho/commit/dcf5b5a326cb40d91729dfcb41f5e17f7205f1cc))
+
 ## [0.1.1](https://github.com/teknikqa/ha-renpho/compare/v0.1.0...v0.1.1) (2026-11-16)
 
 
