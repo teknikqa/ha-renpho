@@ -189,3 +189,17 @@ async def test_poll_interval_option(hass, cloud):
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.runtime_data.update_interval == timedelta(minutes=10)
+
+
+async def test_diagnostics_hide_the_account(hass, cloud):
+    from custom_components.renpho_cloud.diagnostics import (
+        async_get_config_entry_diagnostics,
+    )
+
+    cloud.records = [{**RECORD, "userId": USER_ID}]
+    entry = await _add_entry(hass)
+
+    result = await async_get_config_entry_diagnostics(hass, entry)
+    assert result["latest_record"]["weight"] == RECORD["weight"]
+    text = str(result)
+    assert EMAIL not in text and PASSWORD not in text and USER_ID not in text
