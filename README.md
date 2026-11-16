@@ -78,7 +78,7 @@ logger:
   token and logs in again only when the token expires or you re-enter your
   password.
 - **A weigh-in is missing.** The integration reads the cloud, not the scale.
-  Open the Renpho Health app so it syncs, then wait up to 30 minutes.
+  Open the Renpho Health app so it syncs, then wait for the next poll (30 minutes unless you changed it).
 
 ## Live check
 
