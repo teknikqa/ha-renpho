@@ -107,14 +107,10 @@ class RenphoClient:
         self.user_id: str | None = None
 
     async def _post(self, path: str, payload: Any, *, auth: bool = True) -> Any:
-        headers = {}
+        # The server picks its decryption key from appVersion, so login needs it too.
+        headers = {"appVersion": _APP_VERSION, "platform": _PLATFORM}
         if auth:
-            headers = {
-                "token": self._token or "",
-                "userId": self.user_id or "",
-                "appVersion": _APP_VERSION,
-                "platform": _PLATFORM,
-            }
+            headers |= {"token": self._token or "", "userId": self.user_id or ""}
         try:
             resp = await self._session.post(
                 BASE_URL + path,

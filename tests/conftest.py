@@ -56,6 +56,9 @@ class FakeCloud:
         raw = decrypt_bytes(data["encryptData"])
         headers = self.mocker.mock_calls[-1][3]
 
+        if headers.get("appVersion") is None:  # the real server answers -114
+            return self._reply(method, url, code=-114, msg="Decryption failed")
+
         if path == LOGIN:
             login = json.loads(raw)["login"]
             if (login["email"], login["password"]) != (EMAIL, self.password):
