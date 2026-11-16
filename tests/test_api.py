@@ -44,14 +44,17 @@ def test_timestamp_accepts_seconds_milliseconds_and_junk():
     assert timestamp({}) == 0
 
 
-async def test_latest_measurement_reads_only_the_first_page(client, cloud):
-    # The server lists newest first; a late-synced record may sit out of place.
-    cloud.records = [{"timeStamp": 9000 - i, "weight": 70} for i in range(120)]
-    cloud.records[3] = {"timeStamp": 9999, "weight": 81.5}
+@pytest.mark.parametrize("oldest_first", [True, False])
+async def test_latest_measurement_pages_through_every_record(
+    client, cloud, oldest_first
+):
+    # 120 records = 3 pages; the newest sits on the last page when listed oldest first.
+    stamps = range(1000, 1120) if oldest_first else range(1119, 999, -1)
+    cloud.records = [{"timeStamp": t, "weight": 70} for t in stamps]
 
-    assert await client.latest_measurement() == {"timeStamp": 9999, "weight": 81.5}
+    assert await client.latest_measurement() == {"timeStamp": 1119, "weight": 70}
     assert client.user_id == USER_ID
-    assert cloud.calls(MEASUREMENTS[0]) == 1
+    assert cloud.calls(MEASUREMENTS[0]) == 3
     assert cloud.calls(MEASUREMENTS[1]) == 0
 
 

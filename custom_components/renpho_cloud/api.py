@@ -37,6 +37,7 @@ _PLATFORM = "android"
 _SCALE_TYPES = [f"{i:02X}" for i in range(1, 21)]
 _OK_CODES = {"0", "101", "200", "20000"}
 _PAGE_SIZE = 50
+_MAX_PAGES = 100
 _TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 
@@ -194,22 +195,32 @@ class RenphoClient:
         return {s["tableName"] for s in scales or [] if s.get("tableName")}
 
     async def _records(self, table: str) -> list[dict[str, Any]]:
-        """Most recent measurements in one table; the server lists newest first."""
-        query = {
-            "pageNum": 1,
-            "pageSize": _PAGE_SIZE,
-            "userIds": [self.user_id],
-            "tableName": table,
-        }
+        """All measurements in one table; the server may list oldest first."""
         for path in MEASUREMENTS:
-            if records := _rows(await self._call(path, query)):
+            records: list[dict[str, Any]] = []
+            # shortcut: stops at 5,000 records, raise _MAX_PAGES if that is ever too few.
+            for page in range(1, _MAX_PAGES + 1):
+                rows = _rows(
+                    await self._call(
+                        path,
+                        {
+                            "pageNum": page,
+                            "pageSize": _PAGE_SIZE,
+                            "userIds": [self.user_id],
+                            "tableName": table,
+                        },
+                    )
+                )
+                records += rows
+                if len(rows) < _PAGE_SIZE:
+                    break
+            if records:
                 return records
         return []
 
     async def latest_measurement(self) -> dict[str, Any] | None:
         """Return the newest measurement across all scales, or None."""
-        # ponytail: newest-first order was seen on one account with 2 records.
-        # If the sensors ever stick on an old weigh-in, page through everything.
+        # Some accounts list oldest first, so every page is read.
         records: list[dict[str, Any]] = []
         for table in await self._tables():
             records += await self._records(table)
