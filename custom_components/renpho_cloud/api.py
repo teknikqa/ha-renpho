@@ -36,7 +36,8 @@ _APP_VERSION = "6.6.0"
 _PLATFORM = "android"
 _SCALE_TYPES = [f"{i:02X}" for i in range(1, 21)]
 _OK_CODES = {"0", "101", "200", "20000"}
-_DECRYPT_FAILED = "-114"  # the server could not read our request: not a bad password
+# Wrong password (104, 20001) or email not registered (106), per renpho-api docs.
+_BAD_LOGIN_CODES = {"104", "20001", "106"}
 _PAGE_SIZE = 50
 _MAX_PAGES = 100
 _TIMEOUT = aiohttp.ClientTimeout(total=30)
@@ -163,11 +164,9 @@ class RenphoClient:
         except RenphoConnectionError:
             raise
         except RenphoError as err:
-            if err.code == _DECRYPT_FAILED:
+            # Other codes (e.g. -114 decrypt failure, 429) are not the user's fault.
+            if err.code not in _BAD_LOGIN_CODES:
                 raise
-            # ponytail: the bad-password code is undocumented, so any API-level
-            # login rejection counts as bad credentials. Match the code if a
-            # cloud-side fault ever triggers a false reauth prompt.
             raise RenphoAuthError(str(err)) from err
         info = data.get("login") if isinstance(data, dict) else None
         if not info or not info.get("token") or info.get("id") is None:

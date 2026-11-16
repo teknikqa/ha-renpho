@@ -62,7 +62,7 @@ class FakeCloud:
         if path == LOGIN:
             login = json.loads(raw)["login"]
             if (login["email"], login["password"]) != (EMAIL, self.password):
-                return self._reply(method, url, code=40001, msg="password error")
+                return self._reply(method, url, code=104, msg="password error")
             return self._reply(
                 method, url, {"login": {"id": int(USER_ID), "token": self.token}}
             )

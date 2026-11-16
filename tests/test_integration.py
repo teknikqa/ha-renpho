@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
+import pytest
 from homeassistant.config_entries import SOURCE_USER, ConfigEntryState
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.renpho_cloud.api import RenphoConnectionError, RenphoError
 from custom_components.renpho_cloud.const import DOMAIN
 
 from .conftest import EMAIL, PASSWORD, USER_ID
@@ -39,6 +43,30 @@ async def _add_entry(hass, password=PASSWORD) -> MockConfigEntry:
     await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     return entry
+
+
+@pytest.mark.parametrize(
+    ("error", "key"),
+    [
+        (RenphoError("login: code=-114 msg=Decryption failed"), "login_rejected"),
+        (RenphoConnectionError("timeout"), "cannot_connect"),
+    ],
+)
+async def test_user_flow_tells_a_refusal_from_a_network_failure(
+    hass, cloud, caplog, error, key
+):
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    with patch(
+        "custom_components.renpho_cloud.config_flow.RenphoClient.login",
+        side_effect=error,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], CREDENTIALS
+        )
+    assert result["errors"] == {"base": key}
+    assert ("-114" in caplog.text) == (key == "login_rejected")
 
 
 async def test_user_flow_creates_entry_and_sensors(hass, cloud):
