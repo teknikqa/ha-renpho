@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from typing import Any
 
@@ -15,8 +16,10 @@ from homeassistant.helpers.selector import (
     TextSelectorType,
 )
 
-from .api import RenphoAuthError, RenphoClient, RenphoError
+from .api import RenphoAuthError, RenphoClient, RenphoConnectionError, RenphoError
 from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 SCHEMA = vol.Schema(
     {
@@ -51,8 +54,12 @@ class RenphoConfigFlow(ConfigFlow, domain=DOMAIN):
                 await client.login()
             except RenphoAuthError:
                 errors["base"] = "invalid_auth"
-            except RenphoError:
+            except RenphoConnectionError:
                 errors["base"] = "cannot_connect"
+            except RenphoError as err:
+                # Keeps the server's code and message (e.g. -114) in the HA log.
+                _LOGGER.warning("Renpho rejected the login: %s", err)
+                errors["base"] = "login_rejected"
             else:
                 await self.async_set_unique_id(client.user_id)
                 if self.source == SOURCE_REAUTH:

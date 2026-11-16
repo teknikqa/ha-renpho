@@ -15,7 +15,8 @@
     },
     "error": {
       "invalid_auth": "Renpho rejected that email and password.",
-      "cannot_connect": "Could not reach the Renpho cloud."
+      "cannot_connect": "Could not reach the Renpho cloud.",
+      "login_rejected": "The Renpho cloud refused the sign-in request. Details are in the Home Assistant log."
     },
     "abort": {
       "already_configured": "This account is already set up.",
