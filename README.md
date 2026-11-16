@@ -49,6 +49,37 @@ If your password changes, Home Assistant asks you to sign in again.
 - Email and password accounts only. Google and Apple sign-in are not supported.
 - Requires Home Assistant 2025.11 or newer.
 
+## Troubleshooting
+
+To see what the integration is doing, add this to `configuration.yaml` and
+restart:
+
+```yaml
+logger:
+  logs:
+    custom_components.renpho_cloud: debug
+```
+
+- **"Renpho rejected that email and password".** Use the email and password of
+  the Renpho Health app (blue icon), not the older Renpho app. Accounts that
+  sign in with Google or Apple have no password and cannot log in here.
+- **"The Renpho cloud refused the sign-in request".** The server answered but
+  not with a bad-password code. The Home Assistant log has its code and
+  message. Code `-114` ("Decryption failed") means the server could not read
+  the request. It happens when the app version is missing or is 8.0.0 or
+  later, so please open an issue with the log line.
+- **"Could not reach the Renpho cloud".** Home Assistant could not connect to
+  `cloud.renpho.com`. Check its internet access and DNS.
+- **Sensors show an old weigh-in.** Update to v0.1.1 or later. Earlier
+  versions read only the first 50 records, which are the oldest on some
+  accounts.
+- **The phone app logged you out.** Renpho allows one active session per
+  account, so any login ends the other one. The integration keeps its session
+  token and logs in again only when the token expires or you re-enter your
+  password.
+- **A weigh-in is missing.** The integration reads the cloud, not the scale.
+  Open the Renpho Health app so it syncs, then wait for the next poll (30 minutes unless you changed it).
+
 ## Live check
 
 Prints the newest raw record for your account, and the order the server
