@@ -10,7 +10,7 @@ from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.renpho_cloud.api import RenphoConnectionError, RenphoError
+from custom_components.renpho_cloud.api import LOGIN, RenphoConnectionError, RenphoError
 from custom_components.renpho_cloud.const import DOMAIN
 
 from .conftest import EMAIL, PASSWORD, USER_ID
@@ -161,3 +161,16 @@ async def test_unload(hass, cloud):
     assert entry.state is ConfigEntryState.LOADED
     assert await hass.config_entries.async_unload(entry.entry_id)
     assert entry.state is ConfigEntryState.NOT_LOADED
+
+
+async def test_token_is_saved_and_reused_after_a_restart(hass, cloud):
+    cloud.records = [RECORD]
+    entry = await _add_entry(hass)
+    assert entry.data["token"] == "token-1"
+    assert entry.data["user_id"] == USER_ID
+    assert cloud.calls(LOGIN) == 1
+
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert cloud.calls(LOGIN) == 1  # the saved token was used, not a new login

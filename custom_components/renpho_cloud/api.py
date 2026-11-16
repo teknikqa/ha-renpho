@@ -99,19 +99,25 @@ class RenphoClient:
     """One Renpho Health account. Logs in lazily and again when the token dies."""
 
     def __init__(
-        self, session: aiohttp.ClientSession, email: str, password: str
+        self,
+        session: aiohttp.ClientSession,
+        email: str,
+        password: str,
+        token: str | None = None,
+        user_id: str | None = None,
     ) -> None:
         self._session = session
         self._email = email
         self._password = password
-        self._token: str | None = None
-        self.user_id: str | None = None
+        # A saved token spares the login, which ends the phone app's session.
+        self.token = token if user_id else None
+        self.user_id = user_id
 
     async def _post(self, path: str, payload: Any, *, auth: bool = True) -> Any:
         # The server picks its decryption key from appVersion, so login needs it too.
         headers = {"appVersion": _APP_VERSION, "platform": _PLATFORM}
         if auth:
-            headers |= {"token": self._token or "", "userId": self.user_id or ""}
+            headers |= {"token": self.token or "", "userId": self.user_id or ""}
         try:
             resp = await self._session.post(
                 BASE_URL + path,
@@ -171,11 +177,11 @@ class RenphoClient:
         info = data.get("login") if isinstance(data, dict) else None
         if not info or not info.get("token") or info.get("id") is None:
             raise RenphoAuthError("login response has no token")
-        self._token = info["token"]
+        self.token = info["token"]
         self.user_id = str(info["id"])
 
     async def _call(self, path: str, payload: Any) -> Any:
-        if self._token:
+        if self.token:
             try:
                 return await self._post(path, payload)
             except RenphoConnectionError:

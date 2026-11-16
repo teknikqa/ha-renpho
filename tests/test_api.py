@@ -128,3 +128,14 @@ async def test_server_error_on_devices_falls_back_to_empty_object(hass, aioclien
 
     assert await client.latest_measurement() is None
     assert seen == [b"", b"{}"]
+
+
+async def test_saved_token_skips_login_and_a_dead_one_falls_back(hass, cloud):
+    session = async_get_clientsession(hass)
+    good = RenphoClient(session, EMAIL, PASSWORD, "token-1", USER_ID)
+    await good.latest_measurement()
+    assert cloud.calls(LOGIN) == 0
+
+    stale = RenphoClient(session, EMAIL, PASSWORD, "dead", USER_ID)
+    await stale.latest_measurement()
+    assert cloud.calls(LOGIN) == 1
