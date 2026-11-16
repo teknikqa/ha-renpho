@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -174,3 +175,17 @@ async def test_token_is_saved_and_reused_after_a_restart(hass, cloud):
     await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.LOADED
     assert cloud.calls(LOGIN) == 1  # the saved token was used, not a new login
+
+
+async def test_poll_interval_option(hass, cloud):
+    cloud.records = [RECORD]
+    entry = await _add_entry(hass)
+    assert entry.runtime_data.update_interval == timedelta(minutes=30)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"poll_minutes": 10}
+    )
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.runtime_data.update_interval == timedelta(minutes=10)

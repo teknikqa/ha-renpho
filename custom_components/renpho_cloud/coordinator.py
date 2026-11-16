@@ -14,7 +14,13 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import RenphoAuthError, RenphoClient, RenphoError
-from .const import CONF_TOKEN, CONF_USER_ID, DOMAIN
+from .const import (
+    CONF_POLL_MINUTES,
+    CONF_TOKEN,
+    CONF_USER_ID,
+    DEFAULT_POLL_MINUTES,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +38,9 @@ class RenphoCoordinator(DataUpdateCoordinator[dict[str, Any] | None]):
             _LOGGER,
             config_entry=entry,
             name=DOMAIN,
-            update_interval=timedelta(minutes=30),
+            update_interval=timedelta(
+                minutes=entry.options.get(CONF_POLL_MINUTES, DEFAULT_POLL_MINUTES)
+            ),
         )
         self.client = RenphoClient(
             async_get_clientsession(hass),
