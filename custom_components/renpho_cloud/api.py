@@ -36,6 +36,7 @@ _APP_VERSION = "6.6.0"
 _PLATFORM = "android"
 _SCALE_TYPES = [f"{i:02X}" for i in range(1, 21)]
 _OK_CODES = {"0", "101", "200", "20000"}
+_DECRYPT_FAILED = "-114"  # the server could not read our request: not a bad password
 _PAGE_SIZE = 50
 _MAX_PAGES = 100
 _TIMEOUT = aiohttp.ClientTimeout(total=30)
@@ -43,6 +44,8 @@ _TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 class RenphoError(Exception):
     """The API rejected a request or returned something unreadable."""
+
+    code: str | None = None  # the server's error code, when it sent one
 
 
 class RenphoConnectionError(RenphoError):
@@ -130,9 +133,12 @@ class RenphoClient:
 
         if not isinstance(body, dict):
             raise RenphoError(f"{path}: unexpected response")
-        code, msg = body.get("code"), str(body.get("msg", ""))
+        code = body.get("code")
+        msg = str(body.get("msg") or body.get("message") or "")
         if str(code) not in _OK_CODES and msg.lower() != "success":
-            raise RenphoError(f"{path}: code={code} msg={msg}")
+            err = RenphoError(f"{path}: code={code} msg={msg}")
+            err.code = str(code)
+            raise err
         data = body.get("data")
         if not data or not isinstance(data, str):
             return data
@@ -161,6 +167,8 @@ class RenphoClient:
         except RenphoConnectionError:
             raise
         except RenphoError as err:
+            if err.code == _DECRYPT_FAILED:
+                raise
             # ponytail: the bad-password code is undocumented, so any API-level
             # login rejection counts as bad credentials. Match the code if a
             # cloud-side fault ever triggers a false reauth prompt.
